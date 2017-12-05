@@ -1,5 +1,5 @@
-/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the Clear BSD license.  
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the Clear BSD license.
  * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
@@ -36,7 +36,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      *      a loop-mode animation.
      *  - *rangemodified* Triggered when the control adds or removes layers which
      *      affect the range or interval of the control or when the range is set
-     *      programattically.     
+     *      programattically.
      *  - *reset* Triggered when the control resets a time-series animation.
      *      Listeners receive an event object with a {Boolean} *looped*
      *      property indicating the control reset due to running in looped mode
@@ -50,67 +50,67 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * {Array(<OpenLayers.Layer>)}
      */
     layers: null,
-	
+
     /**
      * APIProperty: units
      * {OpenLayers.TimeUnit}
      */
 	units:null,
-	
+
     /**
      * APIProperty: step
-     * {Number} The number of time units each tick will advance the current 
+     * {Number} The number of time units each tick will advance the current
      *     animation time. Negative units with tick time in reverse.
      *     Default : 1.
      */
 	step:1,
-	
+
     /**
      * APIProperty: range
      * {Array(Date|String)} 2 member array containing the minimum and maximum times
      *     in UTC that the time-series animation will use. (Optional if using
      *     the intervals property). The 1st value should ALWAYS be less than
      *     the second value. Use negative step values to do reverse time.
-     *     Note: You can use an ISO 8601 formated string (see 
+     *     Note: You can use an ISO 8601 formated string (see
      *     http://tools.ietf.org/html/rfc3339) or Date objects.
      */
 	range:null,
-	
+
 	/**
 	 * APIProperty: intervals
 	 * {Array(Date|String)} Array of valid distinct UTC dates/times that the time-
 	 * 	   series animation can use. (Optional)
-	 *     Note: You can use an ISO 8601 formated string (see 
+	 *     Note: You can use an ISO 8601 formated string (see
      *     http://tools.ietf.org/html/rfc3339) or Date objects.
 	 */
 	intervals:null,
-    
+
     /**
      * APIProperty: timespans
      * {Array(Object|String)} Array of valid start,end,resolution objects
      *     series animation can use. (Optional)
-     *     Note: You can use an ISO 8601 formated string (see 
+     *     Note: You can use an ISO 8601 formated string (see
      *     http://tools.ietf.org/html/rfc3339) or Date objects.
      */
     timespans:null,
-    
+
 	/**
 	 * APIProperty: frameRate
-	 * {Number} A positive floating point number of frames (or ticks) per 
+	 * {Number} A positive floating point number of frames (or ticks) per
 	 *     second to use in time-series animations. Values less than 1 will
 	 *     make each tick last for more than 1 second. Example: 0.5 = 1 tick
-	 *     every 2 seconds. 3 = 3 ticks per second.  
-	 *     Default : 1. 
+	 *     every 2 seconds. 3 = 3 ticks per second.
+	 *     Default : 1.
 	 */
 	frameRate:1,
-	
+
 	/**
 	 * APIProperty: loop
 	 * {Boolean} true to continue running the animation until stop is called
 	 *     Default:false
 	 */
 	loop:false,
-	
+
 	/**
 	 * APIProperty: snapToIntervals
 	 * {Boolean} If intervals are configured and this property is true then
@@ -118,7 +118,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     regardless of the step value.
 	 */
 	snapToIntervals:false,
-	
+
 	/**
 	 * APIProperty: maxFrameDelay
 	 * {Number} The number of frame counts to delay the firing of the tick event
@@ -126,27 +126,27 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 *     Default: 1
 	 */
     maxFrameDelay: 1,
-    
+
     /**
 	 * APIProperty: currentTime
 	 * {Date} The current time of the time-series animation
 	 */
 	currentTime:null,
-	
+
 	/**
 	 * Property: timeAgents
 	 * {Array(<OpenLayers.TimeAgent>)} An array of the agents that
 	 *     this control "manages". Read-Only
 	 */
 	timeAgents:null,
-    
+
     /**
      * Property: lastTimeIndex
      * {Number} The array index of the last time used in the control when
      * snapToIntevals is true.
      */
     lastTimeIndex:-1,
-	
+
 	/**
      * Constructor: OpenLayers.Control.TimeManager
      * Create a new time manager control.
@@ -259,8 +259,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             if((lyr.dimensions && lyr.dimensions.time) || (lyr.metadata.timeInterval && lyr.metadata.timeInterval.length)) {
                 this.layers.push(lyr);
             }
-        }            
-        
+        }
+
         if(!this.timeAgents) {
             this.timeAgents = this.buildTimeAgents(this.layers);
         }
@@ -299,7 +299,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             'removelayer' : this.onRemoveLayer,
             scope : this
         });
-    }, 
+    },
     onAddLayer: function(evt) {
         var lyr = evt.layer;
         if(lyr.dimensions && lyr.dimensions.time) {
@@ -408,7 +408,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * Advance/reverse time one step forward/backward. Fires the 'tick' event
      * if time can be incremented without exceeding the time range.
      *
-     */ 
+     */
 	 tick:function() {
         if(this.intervals && this.snapToIntervals) {
             var newIndex = this.lastTimeIndex + ((this.step > 0) ? 1 : -1);
@@ -451,9 +451,9 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
                 this.clearTimer();
                 intervalId = setInterval(OpenLayers.Function.bind(function() {
                     var doTick = this.canTickCheck() || checkCount++ >= maxDelays;
-                    if(checkCount > maxDelays) {
+                    /* if(checkCount > maxDelays) {
                         //console.debug('ADVANCED DUE TO TIME LIMIT');
-                    }
+                    } */
                     if(doTick) {
                         clearInterval(intervalId);
                         this.events.triggerEvent('tick', {
@@ -472,7 +472,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * APIMethod: play
      * Begins/resumes the time-series animation. Fires the 'play' event,
      * then calls 'tick' at the interval set by the frameRate property
-     */ 
+     */
 	 play:function() {
         //ensure that we don't have multiple timers running
         this.clearTimer();
@@ -497,7 +497,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * APIMethod: setRange
 	 * Sets the time range used by this control. Will modify the start time or
 	 * current time only if the animation is not currently running
-	 * 
+	 *
 	 * Parameters:
 	 * range - {Arrray(Date|String)} UTC time range using either Date objects
 	 *     or ISO 8601 formatted strings
@@ -528,7 +528,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * Sets the start time for an animation. If the step is negative then this
 	 * sets the maximum time in the control's range parameter. Will only effect
 	 * the currentTime if an animation has not begun.
-	 * 
+	 *
 	 * Parameters:
 	 * time - {Date|String} UTC start time/date using either a Date object or
 	 *     ISO 8601 formatted string.
@@ -545,11 +545,11 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * Sets the end time for an animation. If the step is negative then this
 	 * sets the minimum time in the control's range parameter. Will not effect
 	 * the current time.
-	 * 
+	 *
 	 * Parameters:
 	 * time - {Date|String} UTC stop time/date using either a Date object or
 	 *     ISO 8601 formatted string.
-	 */	
+	 */
 	setEnd:function(time){
         if(this.step>0){
             this.setRange([this.range[0],time]);
@@ -564,7 +564,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * Parameters: {Object} time
      * time - {Date|String} UTC current animantion time/date using either a
      *     Date object or ISO 8601 formatted string.
-     */ 
+     */
      setTime:function(time) {
         if(!( time instanceof Date)) {
             time = OpenLayers.Date.parse(time);
@@ -612,11 +612,11 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
     /**
      * APIMethod:reset
      * Resets the time to the animation start time. Fires the 'reset' event.
-     * 
+     *
      * Parameters: {Boolean} looped - trigger reset event with looped = true
      * Returns:
      * {Date} the control's currentTime, which is also the control's start time
-     */ 
+     */
      reset:function(looped) {
         this.clearTimer();
         var newTime = new Date(this.range[(this.step > 0) ? 0 : 1].getTime());
@@ -633,7 +633,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
      * Parameters:
      * step - {Number}
      * stepUnit - {<OpenLayers.TimeUnit>}
-     */ 
+     */
      incrementTime:function(step,stepUnit) {
         var step = step || this.step;
         var stepUnit = stepUnit || this.units;
@@ -644,10 +644,10 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	/**
 	 * Method: buildTimeAgents
 	 * Creates the controls "managed" by this control.
-	 * 
+	 *
 	 * Parameters:
 	 * layers - {Array(<OpenLayers.Layer>)}
-	 * 
+	 *
 	 * Returns:
 	 * {Array(<OpenLayers.Control.TimeControl>)}
 	 */
@@ -706,7 +706,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         }
         return (agents.length) ? agents : null;
     },
-	
+
     removeAgentLayer: function(lyr) {
         //find the agent with the layer
         for(var i = 0, len = this.timeAgents.length; i < len; i++) {
@@ -732,7 +732,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * Parameters:
 	 *    agents - {Array(<OpenLayers.TimeAgent>)}
 	 *       (Optional) An array of time agents to calculate the intervals from.
-	 *       Defaults to the control's timeAgents property. 
+	 *       Defaults to the control's timeAgents property.
 	 * Returns: {Array(Date)}
 	 */
     buildIntervals:function(agents){
@@ -754,7 +754,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
 	 * Parameters:
 	 *    agents - {Array(<OpenLayers.TimeAgent>)}
 	 *       (Optional) An array of time agents to calculate the intervals from.
-	 *       Defaults to the control's timeAgents property. 
+	 *       Defaults to the control's timeAgents property.
 	 * Returns: {Array(Date)}
 	 */
     buildRange:function(agents){
@@ -767,7 +767,7 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         }
         return (range.length)?range:null;
     },
-    
+
     guessPlaybackRate:function(){
         if(!this.timeAgents){return false;}
         var timeSpans=this.getValidTimeSpans();
@@ -850,8 +850,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         return (validTimes.length) ? validTimes : null;
-    }, 
-    
+    },
+
     timeExtentsToIntervals: function(timeExtents) {
         var intervals = [];
         for(var i = 0; i < timeExtents.length; ++i) {
@@ -865,8 +865,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         return (intervals.length) ? intervals : null;
-    }, 
-    
+    },
+
     getUniqueDates:function(dates) {
         //sort the times
         dates.sort(function(a, b) {
@@ -884,8 +884,8 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
         });
 
         return dates;
-    }, 
-    
+    },
+
     canTickCheck: function() {
         var canTick = false;
         for(var i = 0, len = this.timeAgents.length; i < len; i++) {
@@ -895,15 +895,15 @@ OpenLayers.Control.TimeManager = OpenLayers.Class(OpenLayers.Control, {
             }
         }
         return canTick;
-    }, 
-    
+    },
+
     clearTimer: function() {
         if(this.timer) {
             clearInterval(this.timer);
             this.timer = null;
         }
     },
-	
+
 	CLASS_NAME:'OpenLayers.Control.TimeManager'
 });
 
@@ -918,5 +918,5 @@ OpenLayers.TimeUnit = {
 
 
 //Adjust the OpenLayers date parse regex to handle BCE dates & years longer than 4 digits
-OpenLayers.Date.dateRegEx = 
+OpenLayers.Date.dateRegEx =
     /^(?:(-?\d+)(?:-(\d{2})(?:-(\d{2}))?)?)?(?:(?:T(\d{1,2}):(\d{2}):(\d{2}(?:\.\d+)?)(Z|(?:[+-]\d{1,2}(?::(\d{2}))?)))|Z)?$/;
