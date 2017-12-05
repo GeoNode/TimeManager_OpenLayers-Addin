@@ -128,7 +128,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
 
     /**
      * Property: timeAgents
-     * {Array(<OpenLayers.DimensionAgent>)} An array of the agents that
+     * {Array(<OpenLayers.Dimension.Agent>)} An array of the agents that
      *     this control "manages". Read-Only
      */
     dimensionAgents : null,
@@ -248,7 +248,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
             var lyr = layers[i];
             var dim = this.dimension;
             if(lyr.dimensions && lyr.dimensions[dim]) {!lyr.metadata && (lyr.metadata = {});
-                var intervals = this.constructor.extentsToIntervals(lyr.dimensions[dim]);
+                var intervals = OpenLayers.Control.DimensionManager.prototype.extentsToIntervals(lyr.dimensions[dim]);
                 if(intervals && intervals.length) {
                     lyr.metadata[dim + 'Interval'] = intervals;
                     this.layers.push(lyr);
@@ -287,7 +287,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
         var lyr = evt.layer;
         var dim = this.dimension;
         if(lyr.dimensions && lyr.dimensions[dim]) {
-            lyr.metadata[dim + 'Interval'] = this.constructor.extentsToIntervals(lyr.dimensions[dim]);
+            lyr.metadata[dim + 'Interval'] = OpenLayers.Control.DimensionManager.prototype.extentsToIntervals(lyr.dimensions[dim]);
         }
         //don't do anything if layer is non-dimensional
         if(!lyr.metadata[dim + 'Interval']) {
@@ -305,7 +305,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
                     if(lyrIntervals.length && !this.fixedIntervals) {
                         this.intervals || (this.intervals = []);
                         var oldIntervalsLen = this.intervals.length, oldRange = [this.range[0] || -1, this.range[1] || 1];
-                        this.intervals = this.constructor.getUniqueValues(this.intervals.concat(lyrIntervals));
+                        this.intervals = OpenLayers.Control.DimensionManager.prototype.getUniqueValues(this.intervals.concat(lyrIntervals));
                         this.validSpans = this.getValidSpans();
                         //adjust range as needed
                         if(!this.range) {
@@ -513,7 +513,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
      */
     setValue : function(value) {
         if(this.snapToIntervals) {
-            var nearest = OpenLayers.Control.DimensionManager.findNearestValues(value, this.intervals);
+            var nearest = OpenLayers.Control.DimensionManager.prototype.findNearestValues(value, this.intervals);
             if(nearest && nearest.exact > -1) {
                 this.currentValue = this.intervals[nearest.exact];
                 this.lastValueIndex = nearest.exact;
@@ -575,7 +575,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
      *    Defaults to this.dimension
      *
      * Returns:
-     * {Array(<OpenLayers.DimensionAgent>)}
+     * {Array(<OpenLayers.Dimension.Agent>)}
      */
     buildDimensionAgents : function(layers, dimension) {
         layers = layers || this.layers || [];
@@ -586,13 +586,13 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
         for(var i = 0, len = layers.length; i < len; i++) {
             var lyr = layers[i];
             if(lyr.dimensions && lyr.dimensions[dimension] && lyr.metadata && !lyr.metadata[dimension + 'Interval']) {
-                lyr.metadata[dimension + 'Interval'] = this.constructor.extentsToIntervals(lyr.dimensions[dimension]);
+                lyr.metadata[dimension + 'Interval'] = OpenLayers.Control.DimensionManager.prototype.extentsToIntervals(lyr.dimensions[dimension]);
             }
             //allow user specified overrides and custom behavior
             if(lyr.dimensionAgent) {
                 var agent;
                 if(lyr.dimensionAgent instanceof Function) {
-                    agent = new OpenLayers.DimensionAgent({
+                    agent = new OpenLayers.Dimension.Agent({
                         onTick : lyr.dimensionAgent,
                         layers : [lyr],
                         'dimension' : dimension,
@@ -608,7 +608,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
             }
             else {
                 var lyrClass = lyr.CLASS_NAME.match(/\.Layer\.(\w+)/)[1];
-                if(OpenLayers.DimensionAgent[lyrClass]) {
+                if(OpenLayers.Dimension.Agent[lyrClass]) {
                     if(!layerTypes[lyrClass]) {
                         layerTypes[lyrClass] = [];
                     }
@@ -628,7 +628,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
             if(this.agentOptions && this.agentOptions[k]) {
                 OpenLayers.Util.applyDefaults(agentOpts, this.agentOptions[k]);
             }
-            agent = new OpenLayers.DimensionAgent[k](agentOpts);
+            agent = new OpenLayers.Dimension.Agent[k](agentOpts);
             this.events.on({
                 'tick' : agent.onTick,
                 scope : agent
@@ -659,9 +659,9 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
     addAgentLayer : function(layer) {
         var added = false;
         var agentClass = layer.CLASS_NAME.match(/\.Layer\.(\w+)/)[1];
-        if( agentClass in OpenLayers.DimensionAgent) {
+        if( agentClass in OpenLayers.Dimension.Agent) {
             for(var i = 0, len = this.dimensionAgents.length; i < len; i++) {
-                if(!layer.dimensionAgent && this.dimensionAgents[i] instanceof OpenLayers.DimensionAgent[agentClass]) {
+                if(!layer.dimensionAgent && this.dimensionAgents[i] instanceof OpenLayers.Dimension.Agent[agentClass]) {
                     this.dimensionAgents[i].addLayer(lyr);
                     added = true;
                     break;
@@ -683,7 +683,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
      * Builds an array of distinct values that the dimension agents are
      * configured with
      * Parameters:
-     *    agents - {Array(<OpenLayers.DimensionAgent>)}
+     *    agents - {Array(<OpenLayers.Dimension.Agent>)}
      *       (Optional) An array of dimension agents to calculate the intervals from.
      *       Defaults to the control's dimensionAgents property.
      * Returns: {Array(Number)}
@@ -706,7 +706,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
      * Builds an 2 member array with the overall min & max values that
      * the dimension agents are configured with.
      * Parameters:
-     *    agents - {Array(<OpenLayers.DimensionAgent>)}
+     *    agents - {Array(<OpenLayers.Dimension.Agent>)}
      *       (Optional) An array of dimension agents to calculate the intervals from.
      *       Defaults to the control's dimensionAgents property.
      * Returns: {Array(Number)}
@@ -790,93 +790,89 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
     CLASS_NAME : 'OpenLayers.Control.DimensionManager'
 });
 
-/** Static Methods **/
+/* Static Methods */
 
-OpenLayers.Util.extend(OpenLayers.Control.DimensionManager, {
+/**
+ * Method: findNearestValues
+ *    Finds the nearest value(s) index for a given test value. If an exact
+ *    match is found, it will return the index for that value. However, if
+ *    no exact match is found, then it will return the indexes before &
+ *    after the test values. If the nearest value is a the end of the range
+ *    then it returns -1 for the other values.
+ * Parameters:
+ *    testValue - {Number} the value to test against the value array.
+ *    values - {Array{Number}} the sorted value array.
+ * Returns: {Object} or {Boolean} with the following properties:
+ *    exact, before, after
+ *    All values will be either -1 or the index of the appropriate key. If
+ *    an exact value is found both 'before'  and 'after' will always be -1.
+ *    If the test value is outside of the range of the values array, then
+ *    the function returns false.
+ */
 
-    /**
-     * Method: findNearestValues
-     *    Finds the nearest value(s) index for a given test value. If an exact
-     *    match is found, it will return the index for that value. However, if
-     *    no exact match is found, then it will return the indexes before &
-     *    after the test values. If the nearest value is a the end of the range
-     *    then it returns -1 for the other values.
-     * Parameters:
-     *    testValue - {Number} the value to test against the value array.
-     *    values - {Array{Number}} the sorted value array.
-     * Returns: {Object} or {Boolean} with the following properties:
-     *    exact, before, after
-     *    All values will be either -1 or the index of the appropriate key. If
-     *    an exact value is found both 'before'  and 'after' will always be -1.
-     *    If the test value is outside of the range of the values array, then
-     *    the function returns false.
-     */
-
-    findNearestValues : function(testValue, values) {
-        var retObj = {
-            exact : -1,
-            before : -1,
-            after : -1
-        };
-        //first check if this value is in the array
-        var index = OpenLayers.Util.indexOf(values, testValue);
-        if(index > -1) {
-            //found an exact value
-            retObj.exact = index;
+OpenLayers.Control.DimensionManager.prototype.findNearestValues = function(testValue, values) {
+    var retObj = {
+        exact : -1,
+        before : -1,
+        after : -1
+    };
+    //first check if this value is in the array
+    var index = OpenLayers.Util.indexOf(values, testValue);
+    if(index > -1) {
+        //found an exact value
+        retObj.exact = index;
+    }
+    else {
+        //no exact value was found. test that this is even in the range
+        if(testValue < values[0] || testValue > values[values.length - 1]) {
+            //outside of the range, return false
+            return false;
         }
         else {
-            //no exact value was found. test that this is even in the range
-            if(testValue < values[0] || testValue > values[values.length - 1]) {
-                //outside of the range, return false
-                return false;
-            }
-            else {
-                //test value is within the range, find the nearest indices
-                for(var i = 0, len = values.length; i < len; i++) {
-                    var diff = testValue - values[i];
-                    if(diff < 0) {
-                        retObj.after = i;
-                        retObj.before = i - 1;
-                        break;
-                    }
-                    else {
-                        retObj.before = i;
-                    }
+            //test value is within the range, find the nearest indices
+            for(var i = 0, len = values.length; i < len; i++) {
+                var diff = testValue - values[i];
+                if(diff < 0) {
+                    retObj.after = i;
+                    retObj.before = i - 1;
+                    break;
+                }
+                else {
+                    retObj.before = i;
                 }
             }
         }
-        return retObj;
-    },
+    }
+    return retObj;
+};
 
-    extentsToIntervals : function(dimension) {
-        var intervals = [];
-        var values = dimension.values;
-        for(var i = 0; i < values.length; ++i) {
-            var valueParts = values[i].split("/");
-            if(valueParts.length > 1) {
-                var min = valueParts[0], max = valueParts[1], res = valueParts[2];
-                intervals.push([min, max, res]);
-            }
-            else {
-                intervals.push(valueParts[0]);
-            }
+OpenLayers.Control.DimensionManager.prototype.extentsToIntervals = function(dimension) {
+    var intervals = [];
+    var values = dimension.values;
+    for(var i = 0; i < values.length; ++i) {
+        var valueParts = values[i].split("/");
+        if(valueParts.length > 1) {
+            var min = valueParts[0], max = valueParts[1], res = valueParts[2];
+            intervals.push([min, max, res]);
         }
-        return (intervals.length) ? intervals : null;
-    },
-
-    getUniqueValues : function(values) {
-        //sort the values
-        values.sort(function(a, b) {
-            return a - b;
-        });
-
-        for(var i = values.length - 1; i > 0; i--) {
-            if(values[i] == values[i - 1]) {
-                values.splice(i, 1);
-            }
+        else {
+            intervals.push(valueParts[0]);
         }
+    }
+    return (intervals.length) ? intervals : null;
+};
 
-        return values;
+OpenLayers.Control.DimensionManager.prototype.getUniqueValues = function(values) {
+    //sort the values
+    values.sort(function(a, b) {
+        return a - b;
+    });
+
+    for(var i = values.length - 1; i > 0; i--) {
+        if(values[i] == values[i - 1]) {
+            values.splice(i, 1);
+        }
     }
 
-});
+    return values;
+};
