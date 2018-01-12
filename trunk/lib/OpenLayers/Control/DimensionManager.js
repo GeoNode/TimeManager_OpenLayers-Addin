@@ -418,7 +418,7 @@ OpenLayers.Control.DimensionManager = OpenLayers.Class(OpenLayers.Control, {
     setCurrentValue : function(value, silent) {
         if(this.snapToList && this.modelCache.values) {
             var values = this.modelCache.values;
-            var nearest = OpenLayers.Control.DimensionManager.findNearestValues(value, values);
+            var nearest = this.findNearestValues(value, values);
             if(!nearest){
                 return false;
             }
